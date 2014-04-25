@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log4Net.Async", "Log4Net.Async\Log4Net.Async.csproj", "{D4D0C360-E967-46E2-A43F-131F9C002B09}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log4Net.Async.Tests", "Log4Net.Async.Tests\Log4Net.Async.Tests.csproj", "{A4C43C9A-2B71-4186-BAB5-DE294E5A05BA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "App", "App", "{EAFB6668-7DDC-469A-96AD-7DBE3DCF0304}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{4D497103-B378-433C-B340-8012E72FD3EF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{A7C34A9D-7673-43F3-9AF0-CCE755D9F43B}"
+	ProjectSection(SolutionItems) = preProject
+		SampleConfig\AsyncForwardingAppender.config = SampleConfig\AsyncForwardingAppender.config
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{AC044B45-4EC7-469A-80D4-67CB180581D9}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D4D0C360-E967-46E2-A43F-131F9C002B09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4D0C360-E967-46E2-A43F-131F9C002B09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4D0C360-E967-46E2-A43F-131F9C002B09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4D0C360-E967-46E2-A43F-131F9C002B09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4C43C9A-2B71-4186-BAB5-DE294E5A05BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4C43C9A-2B71-4186-BAB5-DE294E5A05BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4C43C9A-2B71-4186-BAB5-DE294E5A05BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4C43C9A-2B71-4186-BAB5-DE294E5A05BA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D4D0C360-E967-46E2-A43F-131F9C002B09} = {EAFB6668-7DDC-469A-96AD-7DBE3DCF0304}
+		{A4C43C9A-2B71-4186-BAB5-DE294E5A05BA} = {4D497103-B378-433C-B340-8012E72FD3EF}
+	EndGlobalSection
+EndGlobal

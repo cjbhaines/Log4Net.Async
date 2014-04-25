@@ -1,0 +1,20 @@
+﻿<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Log4Net.Async</id>
+    <version>1.0.0.0</version>
+    <authors>Chris Haines</authors>
+    <owners>Chris Haines</owners>
+    <licenseUrl>http://www.opensource.org/licenses/mit-license.php</licenseUrl>
+    <projectUrl>https://github.com/cjbhaines/Log4Net.Async</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Asynchronous Log4Net appenders and forwarder</description>
+    <tags>log4net .net40 asynchronous async</tags>
+    <dependencies>
+      <dependency id="log4net" version="2.0.0" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Release\Log4Net.Async.dll" target="lib\net40\Log4Net.Async.dll" />
+  </files>
+</package>
