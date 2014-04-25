@@ -11,7 +11,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{4D497103-B
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{A7C34A9D-7673-43F3-9AF0-CCE755D9F43B}"
 	ProjectSection(SolutionItems) = preProject
+		SampleConfig\AsyncAdoAppender.config = SampleConfig\AsyncAdoAppender.config
 		SampleConfig\AsyncForwardingAppender.config = SampleConfig\AsyncForwardingAppender.config
+		SampleConfig\AsyncRollingFileAppender.config = SampleConfig\AsyncRollingFileAppender.config
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{AC044B45-4EC7-469A-80D4-67CB180581D9}"
