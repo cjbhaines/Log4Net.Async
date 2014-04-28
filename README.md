@@ -14,19 +14,26 @@ Async Forwarder
 =============
 ###AsyncForwardingAppender
 
-This is easily setup and wraps existing appenders like so:
+This is easily setup and wraps multiple appenders like so:
 
 	<appender name="rollingFile" type="log4net.Appender.RollingFileAppender">
 		...
 	</appender>
-
+	
+	<appender name="adoNet" type="log4net.Appender.AdoNetAppender">
+		...
+	</appender>
+	
 	<appender name="asyncForwarder" type="Log4Net.Async.AsyncForwardingAppender,Log4Net.Async">
 		<appender-ref ref="rollingFile" />
+		<appender-ref ref="adoNet" />
 	</appender>
 
 	<root>
 		<appender-ref ref="asyncForwarder" />
 	</root>
+  
+Note: If you are using many appenders such as Console, Gelf, File, etc along with an AdoNetAppender and your database is not highly optimized I would recommend using a dedicated forwarder for the AdoNetAppender.
   
 Async Appenders
 =============
