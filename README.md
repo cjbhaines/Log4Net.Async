@@ -14,7 +14,7 @@ Async Forwarder
 =============
 ###AsyncForwardingAppender
 
-This is easily setup and wraps multiple appenders like so:
+This is easily set up and wraps multiple appenders like so:
 
 	<appender name="rollingFile" type="log4net.Appender.RollingFileAppender">
 		...
