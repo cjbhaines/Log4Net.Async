@@ -11,7 +11,7 @@ using NUnit.Framework;
 
 namespace Log4Net.Async.Tests
 {
-    [TestFixture]
+    [TestFixture, Explicit]
     public class AsyncAdoAppenderTest
     {
         private const string connectionString = "Server=localhost;Integrated Security=true;Database=Logs;MultipleActiveResultSets=true;Enlist=false;Connection Timeout=10";

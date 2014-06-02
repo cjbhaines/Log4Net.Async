@@ -1,6 +1,8 @@
 Log4Net.Async
 =============
 
+[![Build status](https://ci.appveyor.com/api/projects/status/fpn8apunhe0fr1y3)](https://ci.appveyor.com/project/cjbhaines/log4net-async)
+
 This library provides asynchronous Log4Net logging which can massively improve application performance if you are logging into a slow database for example. The basic concept with the library is that is uses a ring buffer with a default limit of 1000 to store pending logging events and will process them on a dedicated background thread. If the head of the buffer overtakes the tail lossy logging occurs and the oldest entries will be lost. This should never be a problem unless you are logging vast amounts of log messages to slow appenders in which case you probably need to readdress your logging.
 
 There are 2 methods to perform async logging using this library:
