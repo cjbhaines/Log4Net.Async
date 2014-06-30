@@ -58,3 +58,12 @@ Async Appenders
 	<root>
       <appender-ref ref="asyncRollingFile" />
     </root>
+
+
+Notes
+=============
+If the Log4Net.Async library is only referenced in non-code (eg. a log4net log.config file), then the VS build process will not automatically copy the Log4Net.Async dll to the build folder for projects that reference other projects using Log4Net.Async. This occurs even if Copy Local is set to "True".
+
+To get around this some of our users have created a dummy class whose sole purpose is to extend the RingBuffer class, without actually doing anything or being used anywhere at all.
+
+If anyone has an elegant solution to this please let me know or submit a pull request.
