@@ -20,7 +20,7 @@ namespace Log4Net.Async.Tests
             }
             ringWatch.Stop();
 
-            Assert.That(ringWatch.ElapsedMilliseconds, Is.LessThan(100));
+            Assert.That(ringWatch.ElapsedMilliseconds, Is.LessThan(150));
         }
 
         [Test]
