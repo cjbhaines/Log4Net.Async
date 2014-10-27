@@ -3,6 +3,7 @@ using System.Threading;
 using log4net.Appender;
 using log4net.Core;
 using log4net.Util;
+using System.Runtime.Remoting.Messaging;
 
 namespace Log4Net.Async
 {
@@ -19,7 +20,7 @@ namespace Log4Net.Async
         private bool shutDownRequested;
 
         private readonly object bufferLock = new object();
-        private RingBuffer<LoggingEvent> buffer;
+        private RingBuffer<LoggingEventContext> buffer;
 
         private bool logBufferOverflow;
         private int bufferOverflowCounter;
@@ -37,6 +38,18 @@ namespace Log4Net.Async
         {
             get { return fixFlags; }
             set { SetFixFlags(value); }
+        }
+
+        private object HttpContext
+        {
+            get
+            {
+               return CallContext.GetData("HtCt");
+            }
+            set
+            {
+                CallContext.SetData("HtCt",value); 
+            }
         }
 
         #region Startup
@@ -97,7 +110,7 @@ namespace Log4Net.Async
             if (!shutDownRequested && loggingEvent != null)
             {
                 loggingEvent.Fix = fixFlags;
-                buffer.Enqueue(loggingEvent);
+                buffer.Enqueue(new LoggingEventContext(loggingEvent,HttpContext));
             }
         }
 
@@ -133,7 +146,7 @@ namespace Log4Net.Async
 
         private void ForwardLoggingEventsFromBuffer()
         {
-            LoggingEvent loggingEvent;
+            LoggingEventContext loggingEventContext;
             while (!shutDownRequested)
             {
                 if (logBufferOverflow)
@@ -142,7 +155,7 @@ namespace Log4Net.Async
                     logBufferOverflow = false;
                 }
 
-                while (!buffer.TryDequeue(out loggingEvent))
+                while (!buffer.TryDequeue(out loggingEventContext))
                 {
                     Thread.Sleep(10);
                     if (shutDownRequested)
@@ -151,15 +164,17 @@ namespace Log4Net.Async
                     }
                 }
 
-                if (loggingEvent != null)
+                if (loggingEventContext != null)
                 {
-                    ForwardLoggingEvent(loggingEvent);
+                    HttpContext = loggingEventContext.HttpContext;
+                    ForwardLoggingEvent(loggingEventContext.LoggingEvent);
                 }
             }
 
-            while (buffer.TryDequeue(out loggingEvent))
+            while (buffer.TryDequeue(out loggingEventContext))
             {
-                ForwardLoggingEvent(loggingEvent);
+                HttpContext = loggingEventContext.HttpContext;
+                ForwardLoggingEvent(loggingEventContext.LoggingEvent);
             }
         }
 
@@ -249,7 +264,7 @@ namespace Log4Net.Async
             {
                 if (buffer == null || buffer.Size != bufferSize)
                 {
-                    buffer = new RingBuffer<LoggingEvent>(bufferSize);
+                    buffer = new RingBuffer<LoggingEventContext>(bufferSize);
                     buffer.BufferOverflow += OnBufferOverflow;
                 }
             }
