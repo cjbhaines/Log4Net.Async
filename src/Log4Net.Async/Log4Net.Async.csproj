@@ -43,6 +43,7 @@
     <Compile Include="AsyncForwardingAppender.cs" />
     <Compile Include="AsyncRollingFileAppender.cs" />
     <Compile Include="IQueue.cs" />
+    <Compile Include="LoggingEventContext.cs" />
     <Compile Include="LoggingEventHelper.cs" />
     <Compile Include="LoggingTaskExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
