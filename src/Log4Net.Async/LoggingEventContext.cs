@@ -1,13 +1,6 @@
-﻿
-namespace Log4Net.Async
+﻿namespace Log4Net.Async
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Log4Net;
     using log4net.Core;
-
 
     internal class LoggingEventContext
     {
@@ -18,6 +11,7 @@ namespace Log4Net.Async
         }
 
         public LoggingEvent LoggingEvent { get; set; }
+
         public object HttpContext { get; set; }
     }
 }
