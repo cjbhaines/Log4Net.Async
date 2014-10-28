@@ -53,6 +53,7 @@
     <Compile Include="AsyncAdoAppenderTest.cs" />
     <Compile Include="AsyncForwarderTest.cs" />
     <Compile Include="AsyncRollingFileAppenderTest.cs" />
+    <Compile Include="ParallelForwarderTest.cs" />
     <Compile Include="DebugAppender.cs" />
     <Compile Include="IntExtensions.cs" />
     <Compile Include="LogsDBAccess.cs" />

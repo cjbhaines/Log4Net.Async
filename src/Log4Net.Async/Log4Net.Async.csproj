@@ -41,11 +41,13 @@
   <ItemGroup>
     <Compile Include="AsyncAdoAppender.cs" />
     <Compile Include="AsyncForwardingAppender.cs" />
+    <Compile Include="AsyncForwardingAppenderBase.cs" />
     <Compile Include="AsyncRollingFileAppender.cs" />
     <Compile Include="IQueue.cs" />
     <Compile Include="LoggingEventContext.cs" />
     <Compile Include="LoggingEventHelper.cs" />
     <Compile Include="LoggingTaskExtensions.cs" />
+    <Compile Include="ParallelForwardingAppender.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RingBuffer.cs" />
   </ItemGroup>
