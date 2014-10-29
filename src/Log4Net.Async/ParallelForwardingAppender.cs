@@ -37,6 +37,15 @@
             set { bufferSize = value; }
         }
 
+        public int BufferEntryCount
+        {
+            get
+            {
+                if (_loggingEvents == null) return 0;
+                return _loggingEvents.Count;
+            }
+        }
+
         /// <summary>
         /// Gets or sets the time period in which the system will wait for appenders to flush before canceling the background task.
         /// </summary>
@@ -112,21 +121,28 @@
             _loggingEvents.CompleteAdding();
             //Allow some time to flush
             Thread.Sleep(_shutdownFlushTimespan);
-            //Cancel the task
-            if (!_loggingCancelationToken.IsCancellationRequested)
+            if (!_loggingTask.IsCompleted && !_loggingCancelationToken.IsCancellationRequested)
             {
                 _loggingCancelationTokenSource.Cancel();
+                //Wait here so that the error logging messages do not get into a random order.
+                try
+                {
+                    _loggingTask.Wait(_loggingCancelationToken);
+                }
+                catch (OperationCanceledException ex)
+                {
+                    //Don't care if the task ends from cancelation.
+                }
             }
             if (!_loggingEvents.IsCompleted)
             {
-                ForwardInternalError("The ParallelForwardingAppender buffer was not able to be flushed before timeout occurred.", null, ThisType);
+                ForwardInternalError("The buffer was not able to be flushed before timeout occurred.", null, ThisType);
             }
         }
 
         protected override void OnClose()
         {
             CompleteSubscriberTask();
-            Dispose();
             base.OnClose();
         }
 
@@ -142,7 +158,9 @@
             }
 
             loggingEvent.Fix = Fix;
-            _loggingEvents.Add(new LoggingEventContext(loggingEvent, HttpContext));
+            //In the case where blocking on a full collection, and the task is subsequently completed, the cancelation token
+            //will prevent the entry from attempting to add to the completed collection which would result in an exception.
+            _loggingEvents.Add(new LoggingEventContext(loggingEvent, HttpContext), _loggingCancelationToken);
         }
 
         protected override void Append(LoggingEvent[] loggingEvents)
@@ -169,43 +187,36 @@
         {
             Thread.CurrentThread.Name = String.Format("{0} ParallelForwardingAppender Subscriber Task", Name);
             //The task will continue in a blocking loop until
-            //the queue is marked as adding completed, or the task is canceled.
-            while (!(_loggingCancelationToken.IsCancellationRequested || _loggingEvents.IsCompleted))
+            //the queue is marked as adding completed, or the task is canceled.            
+            try
             {
-                try
+                //This call blocks until an item is available or until adding is completed
+                foreach (var entry in _loggingEvents.GetConsumingEnumerable(_loggingCancelationToken))
                 {
-                    //This call blocks until an item is available.
-                    var entry = _loggingEvents.Take(_loggingCancelationToken);
-                    //Check if there is an entry since the take may have been canceled.
-                    if (entry != null)
-                    {
-                        HttpContext = entry.HttpContext;
-                        ForwardLoggingEvent(entry.LoggingEvent, ThisType);
-                    }
-                }
-                catch (ThreadAbortException ex)
-                {
-                    //Thread abort may occur on domain unload.
-                    ForwardInternalError("Subscriber task was aborted.", ex, ThisType);
-                    CompleteSubscriberTask();
-                    //The exception is swallowed because we don't want the client application
-                    //to halt due to a logging issue.
-                }
-                catch (Exception ex)
-                {
-                    //On exception, try to log the exception
-                    ForwardInternalError("Subscriber task error in forwarding loop.", ex, ThisType);
-                    CompleteSubscriberTask();
-                    //The exception is swallowed because we don't want the client application
-                    //to halt due to a logging issue.
+                    HttpContext = entry.HttpContext;
+                    ForwardLoggingEvent(entry.LoggingEvent, ThisType);
                 }
             }
-            //The following is necessary to move the task into the canceled state,
-            //otherwise it would be left in a faulted state.   A fault state
-            //would indicate that the logging thread did not complete gracefully.
-            if ((_loggingCancelationToken.IsCancellationRequested))
+            catch (OperationCanceledException ex)
             {
-                _loggingCancelationToken.ThrowIfCancellationRequested();
+                //The thread was canceled before all entries could be fowarded and the collection completed.
+                ForwardInternalError("Subscriber task was canceled before completion.", ex, ThisType);
+                //Cancelation is called in the CompleteSubscriberTask so don't call that again.
+            }
+            catch (ThreadAbortException ex)
+            {
+                //Thread abort may occur on domain unload.
+                ForwardInternalError("Subscriber task was aborted.", ex, ThisType);
+                //Cannot recover from a thread abort so complete the task.
+                CompleteSubscriberTask();
+                //The exception is swallowed because we don't want the client application
+                //to halt due to a logging issue.
+            }
+            catch (Exception ex)
+            {
+                //On exception, try to log the exception
+                ForwardInternalError("Subscriber task error in forwarding loop.", ex, ThisType);
+                //let the subscriber thread continue since the error may have been a temporary condition.                    
             }
         }
 
@@ -228,8 +239,14 @@
             {
                 if (disposing)
                 {
+                    if(_loggingTask !=null)
+                    {
+                        _loggingTask.Dispose();
+                        _loggingTask = null;
+                    }
                     if (_loggingEvents != null)
                     {
+                        CompleteSubscriberTask();
                         _loggingEvents.Dispose();
                         _loggingEvents = null;
                     }
