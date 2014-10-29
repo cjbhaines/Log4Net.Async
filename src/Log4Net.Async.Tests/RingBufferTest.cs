@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using NUnit.Framework;
-using System.Threading;
+﻿using NUnit.Framework;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Log4Net.Async.Tests
 {
@@ -42,7 +42,7 @@ namespace Log4Net.Async.Tests
                     {
                         ringBuffer.Enqueue("StringOfFun");
                     }
-                },cancelationToken));
+                }, cancelationToken));
             }
             ringWatch.Start();
             ringTasks.ForEach(t => t.Start());
@@ -51,16 +51,18 @@ namespace Log4Net.Async.Tests
             ringWatch.Stop();
             //Cancel tasks to avoid System.AppDominUnloadException which is caused when the domain is unloaded
             //and threads created in the domain are not stopped.
-            //Do this before assertions because they may throw an exception causing the thread cancelation to not happen.
+            //Do this before assertions because they may throw an exception causing the thread cancellation to not happen.
             cancelationTokenSource.Cancel();
             try
             {
                 Task.WaitAll(allTasks);
-            }catch(AggregateException ex )
+            }
+            catch (AggregateException)
             {
-                //Don't care about cacellation Exceptions.
+                //Don't care about cancellation Exceptions.
             }
             //Tolerance at 500 was too low
+            ringTasks.ForEach(t => t.Dispose());
             Assert.That(ringWatch.ElapsedMilliseconds, Is.LessThan(1000));
         }
 
@@ -81,8 +83,7 @@ namespace Log4Net.Async.Tests
                     {
                         ringBuffer.Enqueue("StringOfFun");
                     }
-                }));
-
+                }, cancelationToken));
             }
             for (int t = 0; t < 10; t++)
             {
@@ -102,16 +103,17 @@ namespace Log4Net.Async.Tests
             ringWatch.Stop();
             //Cancel tasks to avoid System.AppDominUnloadException which is caused when the domain is unloaded
             //and threads created in the domain are not stopped.
-            //Do this before assertions because they may throw an exception causing the thread cancelation to not happen.
+            //Do this before assertions because they may throw an exception causing the thread cancellation to not happen.
             cancelationTokenSource.Cancel();
             try
             {
                 Task.WaitAll(allTasks);
             }
-            catch (AggregateException ex)
+            catch (AggregateException)
             {
-                //Don't care about cacellation Exceptions.
+                //Don't care about cancellation Exceptions.
             }
+            ringTasks.ForEach(t => t.Dispose());
             Assert.That(ringWatch.ElapsedMilliseconds, Is.LessThan(800));
         }
 

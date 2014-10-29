@@ -1,9 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Security.Principal;
-using System.Threading;
-using log4net;
+﻿using log4net;
 using log4net.Appender;
 using log4net.Config;
 using log4net.Core;
@@ -11,6 +6,11 @@ using log4net.Filter;
 using log4net.Repository;
 using NUnit.Framework;
 using Rhino.Mocks;
+using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Security.Principal;
+using System.Threading;
 
 namespace Log4Net.Async.Tests
 {
@@ -59,7 +59,6 @@ namespace Log4Net.Async.Tests
             Assert.That(debugAppender.GetEvents()[0].MessageObject, Is.EqualTo("SusequentMessage"));
         }
 
-
         [Test]
         public void CanHandleNullLoggingEvents()
         {
@@ -74,7 +73,6 @@ namespace Log4Net.Async.Tests
             Assert.That(debugAppender.LoggedEventCount, Is.EqualTo(1), "Expected subsequent message only");
             Assert.That(debugAppender.GetEvents()[0].MessageObject, Is.EqualTo("SusequentMessage"));
         }
-
 
         [Test]
         public void CanHandleAppenderThrowing()
@@ -100,7 +98,6 @@ namespace Log4Net.Async.Tests
             badAppender.VerifyAllExpectations();
         }
 
-
         [Test]
         public void WillLogFastWhenThereIsASlowAppender()
         {
@@ -123,7 +120,6 @@ namespace Log4Net.Async.Tests
             Assert.That(watch.ElapsedMilliseconds, Is.LessThan(testSize));
             Console.WriteLine("Logged {0} errors in {1}ms", testSize, watch.ElapsedMilliseconds);
         }
-
 
         [Test]
         public void WillLogBufferOverflowWhenItHappens()
@@ -151,7 +147,6 @@ namespace Log4Net.Async.Tests
             Assert.That(bufferOverflowEvents, Is.Not.Empty);
             Console.WriteLine("Buffer overflow message raised {0} time(s)", bufferOverflowEvents.Length);
         }
-
 
         [Test]
         public void WillTryToFlushBufferOnShutdown()
@@ -182,7 +177,6 @@ namespace Log4Net.Async.Tests
             Console.WriteLine("Flushed {0} events during shutdown", numberLoggedAfterClose - numberLoggedBeforeClose);
         }
 
-
         [Test, Explicit("Long-running")]
         public void WillShutdownIfBufferCannotBeFlushedFastEnough()
         {
@@ -212,7 +206,7 @@ namespace Log4Net.Async.Tests
             Assert.That(numberLoggedBeforeClose, Is.GreaterThan(0));
             Assert.That(numberLoggedAfterClose, Is.GreaterThan(numberLoggedBeforeClose));
             Assert.That(numberLoggedAfterClose, Is.LessThan(testSize));
-            Assert.That(watch.ElapsedMilliseconds, Is.LessThan(6500), "should be around 5s + the duration of the last append");
+            Assert.That(watch.ElapsedMilliseconds, Is.LessThan(10000), "should be around 5s + the duration of the last append");
 
             Console.WriteLine("Flushed {0} events during shutdown which lasted {1}ms", numberLoggedAfterClose - numberLoggedBeforeClose, watch.ElapsedMilliseconds);
         }
@@ -257,7 +251,6 @@ namespace Log4Net.Async.Tests
             //Assert
             Assert.That(debugAppender.LoggedEventCount, Is.EqualTo(2));
         }
-
 
         [Test]
         public void HelperCanGenerateLoggingEventWithAllProperties()

@@ -1,6 +1,7 @@
 ﻿namespace Log4Net.Async
 {
     using log4net.Core;
+    using log4net.Util;
     using System;
     using System.Collections.Concurrent;
     using System.Threading;
@@ -129,9 +130,9 @@
                 {
                     _loggingTask.Wait(_loggingCancelationToken);
                 }
-                catch (OperationCanceledException ex)
+                catch (OperationCanceledException)
                 {
-                    //Don't care if the task ends from cancelation.
+                    //Don't care if the task ends from cancellation.
                 }
             }
             if (!_loggingEvents.IsCompleted)
@@ -158,7 +159,7 @@
             }
 
             loggingEvent.Fix = Fix;
-            //In the case where blocking on a full collection, and the task is subsequently completed, the cancelation token
+            //In the case where blocking on a full collection, and the task is subsequently completed, the cancellation token
             //will prevent the entry from attempting to add to the completed collection which would result in an exception.
             _loggingEvents.Add(new LoggingEventContext(loggingEvent, HttpContext), _loggingCancelationToken);
         }
@@ -187,7 +188,7 @@
         {
             Thread.CurrentThread.Name = String.Format("{0} ParallelForwardingAppender Subscriber Task", Name);
             //The task will continue in a blocking loop until
-            //the queue is marked as adding completed, or the task is canceled.            
+            //the queue is marked as adding completed, or the task is canceled.
             try
             {
                 //This call blocks until an item is available or until adding is completed
@@ -199,9 +200,9 @@
             }
             catch (OperationCanceledException ex)
             {
-                //The thread was canceled before all entries could be fowarded and the collection completed.
+                //The thread was canceled before all entries could be forwarded and the collection completed.
                 ForwardInternalError("Subscriber task was canceled before completion.", ex, ThisType);
-                //Cancelation is called in the CompleteSubscriberTask so don't call that again.
+                //Cancellation is called in the CompleteSubscriberTask so don't call that again.
             }
             catch (ThreadAbortException ex)
             {
@@ -216,7 +217,7 @@
             {
                 //On exception, try to log the exception
                 ForwardInternalError("Subscriber task error in forwarding loop.", ex, ThisType);
-                //let the subscriber thread continue since the error may have been a temporary condition.                    
+                //let the subscriber thread continue since the error may have been a temporary condition.
             }
         }
 
@@ -239,21 +240,61 @@
             {
                 if (disposing)
                 {
-                    if(_loggingTask !=null)
+                    if (_loggingTask != null)
                     {
-                        _loggingTask.Dispose();
-                        _loggingTask = null;
+                        if (!(_loggingTask.IsCanceled || _loggingTask.IsCompleted || _loggingTask.IsFaulted))
+                        {
+                            try
+                            {
+                                CompleteSubscriberTask();
+                            }
+                            catch (Exception ex)
+                            {
+                                LogLog.Error(ThisType, "Exception Completing Subscriber Task in Dispose Method", ex);
+                            }
+                        }
+                        try
+                        {
+                            _loggingTask.Dispose();
+                        }
+                        catch (Exception ex)
+                        {
+                            LogLog.Error(ThisType, "Exception Disposing Logging Task", ex);
+                        }
+                        finally
+                        {
+                            _loggingTask = null;
+                        }
                     }
                     if (_loggingEvents != null)
                     {
-                        CompleteSubscriberTask();
-                        _loggingEvents.Dispose();
-                        _loggingEvents = null;
+                        try
+                        {
+                            _loggingEvents.Dispose();
+                        }
+                        catch (Exception ex)
+                        {
+                            LogLog.Error(ThisType, "Exception Disposing BlockingCollection", ex);
+                        }
+                        finally
+                        {
+                            _loggingEvents = null;
+                        }
                     }
                     if (_loggingCancelationTokenSource != null)
                     {
-                        _loggingCancelationTokenSource.Dispose();
-                        _loggingCancelationTokenSource = null;
+                        try
+                        {
+                            _loggingCancelationTokenSource.Dispose();
+                        }
+                        catch (Exception ex)
+                        {
+                            LogLog.Error(ThisType, "Exception Disposing CancellationTokenSource", ex);
+                        }
+                        finally
+                        {
+                            _loggingCancelationTokenSource = null;
+                        }
                     }
                 }
                 _disposed = true;
