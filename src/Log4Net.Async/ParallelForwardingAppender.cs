@@ -126,14 +126,9 @@
             {
                 _loggingCancelationTokenSource.Cancel();
                 //Wait here so that the error logging messages do not get into a random order.
-                try
-                {
-                    _loggingTask.Wait(_loggingCancelationToken);
-                }
-                catch (OperationCanceledException)
-                {
-                    //Don't care if the task ends from cancellation.
-                }
+                //Don't pass the cancellation token because we are not interested
+                //in catching the OperationCanceledException that results.
+                _loggingTask.Wait();
             }
             if (!_loggingEvents.IsCompleted)
             {
@@ -217,7 +212,9 @@
             {
                 //On exception, try to log the exception
                 ForwardInternalError("Subscriber task error in forwarding loop.", ex, ThisType);
-                //let the subscriber thread continue since the error may have been a temporary condition.
+                //Any error in the loop is going to be some sort of extenuating circumstance from which we
+                //probably cannot recover anyway.   Complete subscribing.
+                CompleteSubscriberTask();
             }
         }
 
