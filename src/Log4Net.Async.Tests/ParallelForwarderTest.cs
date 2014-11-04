@@ -8,16 +8,15 @@ using NUnit.Framework;
 using Rhino.Mocks;
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Security.Principal;
 using System.Threading;
 
 namespace Log4Net.Async.Tests
 {
     [TestFixture]
-    public class AsyncForwarderTest
+    public class ParallelForwarderTest : IDisposable
     {
-        private AsyncForwardingAppender asyncForwardingAppender;
+        private ParallelForwardingAppender asyncForwardingAppender;
         private DebugAppender debugAppender;
         private ILoggerRepository repository;
         private ILog log;
@@ -28,7 +27,7 @@ namespace Log4Net.Async.Tests
             debugAppender = new DebugAppender();
             debugAppender.ActivateOptions();
 
-            asyncForwardingAppender = new AsyncForwardingAppender();
+            asyncForwardingAppender = new ParallelForwardingAppender();
             asyncForwardingAppender.AddAppender(debugAppender);
             asyncForwardingAppender.ActivateOptions();
 
@@ -122,7 +121,7 @@ namespace Log4Net.Async.Tests
         }
 
         [Test]
-        public void WillLogBufferOverflowWhenItHappens()
+        public void WillNotOverflow()
         {
             const int testSize = 1000;
 
@@ -136,16 +135,11 @@ namespace Log4Net.Async.Tests
                 log.Error("Exception");
             }
 
-            Thread.Sleep(100);
+            while (asyncForwardingAppender.BufferEntryCount > 0) ;
             asyncForwardingAppender.Close();
 
             // Assert
-            var loggedEvents = debugAppender.GetEvents();
-            var bufferOverflowEvents = loggedEvents
-                .Where(e => e.MessageObject.ToString().Contains("Buffer overflow")).ToArray();
-
-            Assert.That(bufferOverflowEvents, Is.Not.Empty);
-            Console.WriteLine("Buffer overflow message raised {0} time(s)", bufferOverflowEvents.Length);
+            Assert.That(debugAppender.LoggedEventCount, Is.EqualTo(testSize));
         }
 
         [Test]
@@ -173,7 +167,7 @@ namespace Log4Net.Async.Tests
             Assert.That(numberLoggedBeforeClose, Is.GreaterThan(0), "Some number of Logging events should be logged prior to appender close.");
             //On some systems, we may not be able to flush all events prior to close, but it is reasonable to assume in this test case
             //that some events should be logged after close.
-            Assert.That(numberLoggedAfterClose, Is.GreaterThan(numberLoggedBeforeClose), "Some number of LoggingEvents should be logged after close.");
+            Assert.That(numberLoggedAfterClose, Is.GreaterThan(numberLoggedBeforeClose),"Some number of LoggingEvents should be logged after close.");
             Console.WriteLine("Flushed {0} events during shutdown", numberLoggedAfterClose - numberLoggedBeforeClose);
         }
 
@@ -183,8 +177,8 @@ namespace Log4Net.Async.Tests
             const int testSize = 250;
 
             // Arrange
-            var watch = new Stopwatch();
             debugAppender.AppendDelay = TimeSpan.FromSeconds(1);
+            Stopwatch watch = new Stopwatch();
 
             // Act
             for (int i = 0; i < testSize; i++)
@@ -196,18 +190,19 @@ namespace Log4Net.Async.Tests
             var numberLoggedBeforeClose = debugAppender.LoggedEventCount;
 
             watch.Start();
-
             asyncForwardingAppender.Close();
-            var numberLoggedAfterClose = debugAppender.LoggedEventCount;
-
             watch.Stop();
+
+            var numberLoggedAfterClose = debugAppender.LoggedEventCount;
 
             // Assert
             Assert.That(numberLoggedBeforeClose, Is.GreaterThan(0));
             Assert.That(numberLoggedAfterClose, Is.GreaterThan(numberLoggedBeforeClose));
             Assert.That(numberLoggedAfterClose, Is.LessThan(testSize));
-            Assert.That(watch.ElapsedMilliseconds, Is.LessThan(10000), "should be around 5s + the duration of the last append");
-
+            //We can't assume what the shutdown time will be.  It will vary from system to system. Don't test shutdown time.            
+            var events = debugAppender.GetEvents();
+            var evnt = events[events.Length - 1];
+            Assert.That(evnt.MessageObject, Is.EqualTo("The buffer was not able to be flushed before timeout occurred."));
             Console.WriteLine("Flushed {0} events during shutdown which lasted {1}ms", numberLoggedAfterClose - numberLoggedBeforeClose, watch.ElapsedMilliseconds);
         }
 
@@ -272,7 +267,7 @@ namespace Log4Net.Async.Tests
             Assert.That(loggingEvent.Domain, Is.EqualTo(AppDomain.CurrentDomain.FriendlyName), "Domain");
             //The identity assigned to new threads is dependent upon AppDomain principal policy.
             //Background information here:http://www.neovolve.com/post/2010/10/21/Unit-testing-a-workflow-that-relies-on-ThreadCurrentPrincipalIdentityName.aspx
-            //VS2013 does have a principal assigned to new threads executing under the VSTest runner.
+            //VS2013 does have a principal assigned to new threads in the unit test.
             //It's probably best not to test that the identity has been set.
             //Assert.That(loggingEvent.Identity, Is.Empty, "Identity: always empty for some reason");
             Assert.That(loggingEvent.UserName, Is.EqualTo(currentUser == null ? String.Empty : currentUser.Name), "UserName");
@@ -282,12 +277,48 @@ namespace Log4Net.Async.Tests
             Assert.That(loggingEvent.LoggerName, Is.EqualTo("TestLoggerName"), "LoggerName");
 
             Assert.That(loggingEvent.Level, Is.EqualTo(Level.Emergency), "Level");
-            Assert.That(loggingEvent.TimeStamp, Is.EqualTo(loggingTime).Within(TimeSpan.FromMilliseconds(5)), "TimeStamp");
+            //Raised time to within 10 ms.   However, this may not be a valid test.  The time is going to vary from system to system.  The
+            //tolerance setting here is arbitrary.
+            Assert.That(loggingEvent.TimeStamp, Is.EqualTo(loggingTime).Within(TimeSpan.FromMilliseconds(10)), "TimeStamp");
             Assert.That(loggingEvent.ExceptionObject, Is.EqualTo(exception), "ExceptionObject");
             Assert.That(loggingEvent.MessageObject, Is.EqualTo("Who's on live support?"), "MessageObject");
 
             Assert.That(loggingEvent.LocationInformation.MethodName, Is.EqualTo(stackFrame.GetMethod().Name), "LocationInformation");
             Assert.That(loggingEvent.Properties["MyProperty"], Is.EqualTo("MyValue"), "Properties");
+        }
+
+        private bool _disposed = false;
+
+        //Implement IDisposable.
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    if (asyncForwardingAppender != null)
+                    {
+                        asyncForwardingAppender.Dispose();
+                        asyncForwardingAppender = null;
+                    }
+                }
+                // Free your own state (unmanaged objects).
+                // Set large fields to null.
+                _disposed = true;
+            }
+        }
+
+        // Use C# destructor syntax for finalization code.
+        ~ParallelForwarderTest()
+        {
+            // Simply call Dispose(false).
+            Dispose(false);
         }
     }
 }

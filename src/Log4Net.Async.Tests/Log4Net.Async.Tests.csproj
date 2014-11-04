@@ -53,6 +53,7 @@
     <Compile Include="AsyncAdoAppenderTest.cs" />
     <Compile Include="AsyncForwarderTest.cs" />
     <Compile Include="AsyncRollingFileAppenderTest.cs" />
+    <Compile Include="ParallelForwarderTest.cs" />
     <Compile Include="DebugAppender.cs" />
     <Compile Include="IntExtensions.cs" />
     <Compile Include="LogsDBAccess.cs" />
@@ -70,6 +71,9 @@
       <Project>{D4D0C360-E967-46E2-A43F-131F9C002B09}</Project>
       <Name>Log4Net.Async</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

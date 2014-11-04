@@ -1,23 +1,17 @@
-﻿using System;
+﻿using log4net.Core;
+using System;
 using System.Threading;
-using log4net.Appender;
-using log4net.Core;
-using log4net.Util;
-using System.Runtime.Remoting.Messaging;
 
 namespace Log4Net.Async
 {
-    public class AsyncForwardingAppender : ForwardingAppender
+    public class AsyncForwardingAppender : AsyncForwardingAppenderBase
     {
-        private const int DefaultBufferSize = 1000;
-        private const FixFlags DefaultFixFlags = FixFlags.Partial;
         private static readonly TimeSpan ShutdownFlushTimeout = TimeSpan.FromSeconds(5);
         private static readonly Type ThisType = typeof(AsyncForwardingAppender);
-
-        private readonly LoggingEventHelper loggingEventHelper = new LoggingEventHelper("AsyncForwardingAppender", DefaultFixFlags);
+        private const int DefaultBufferSize = 1000;
 
         private Thread forwardingThread;
-        private bool shutDownRequested;
+        private volatile bool shutDownRequested;
 
         private readonly object bufferLock = new object();
         private RingBuffer<LoggingEventContext> buffer;
@@ -27,28 +21,18 @@ namespace Log4Net.Async
         private DateTime lastLoggedBufferOverflow;
 
         private int bufferSize = DefaultBufferSize;
-        public int? BufferSize
+
+        public override int? BufferSize
         {
             get { return bufferSize; }
             set { SetBufferSize(value); }
         }
 
-        FixFlags fixFlags = DefaultFixFlags;
-        public FixFlags Fix
-        {
-            get { return fixFlags; }
-            set { SetFixFlags(value); }
-        }
-
-        private object HttpContext
+        protected override string InternalLoggerName
         {
             get
             {
-               return CallContext.GetData("HtCt");
-            }
-            set
-            {
-                CallContext.SetData("HtCt",value); 
+                return "AsyncForwardingAppender";
             }
         }
 
@@ -57,9 +41,7 @@ namespace Log4Net.Async
         public override void ActivateOptions()
         {
             base.ActivateOptions();
-
             InitializeBuffer();
-            InitializeAppenders();
             StartForwarding();
         }
 
@@ -78,9 +60,9 @@ namespace Log4Net.Async
                 };
             forwardingThread.Start();
         }
-        
-        #endregion
-        
+
+        #endregion Startup
+
         #region Shutdown
 
         protected override void OnClose()
@@ -97,20 +79,20 @@ namespace Log4Net.Async
             if (!hasFinishedFlushingBuffer)
             {
                 forwardingThread.Abort();
-                ForwardInternalError("Unable to flush the AsyncForwardingAppender buffer in the allotted time, forcing a shutdown", null);
+                ForwardInternalError("Unable to flush the AsyncForwardingAppender buffer in the allotted time, forcing a shutdown", null, ThisType);
             }
         }
 
-        #endregion
-        
+        #endregion Shutdown
+
         #region Appending
 
         protected override void Append(LoggingEvent loggingEvent)
         {
             if (!shutDownRequested && loggingEvent != null)
             {
-                loggingEvent.Fix = fixFlags;
-                buffer.Enqueue(new LoggingEventContext(loggingEvent,HttpContext));
+                loggingEvent.Fix = Fix;
+                buffer.Enqueue(new LoggingEventContext(loggingEvent, HttpContext));
             }
         }
 
@@ -125,8 +107,8 @@ namespace Log4Net.Async
             }
         }
 
-        #endregion
-        
+        #endregion Appending
+
         #region Forwarding
 
         private void ForwardingThreadExecute()
@@ -139,7 +121,7 @@ namespace Log4Net.Async
                 }
                 catch (Exception exception)
                 {
-                    ForwardInternalError("Unexpected error in asynchronous forwarding loop", exception);
+                    ForwardInternalError("Unexpected error in asynchronous forwarding loop", exception, ThisType);
                 }
             }
         }
@@ -167,82 +149,25 @@ namespace Log4Net.Async
                 if (loggingEventContext != null)
                 {
                     HttpContext = loggingEventContext.HttpContext;
-                    ForwardLoggingEvent(loggingEventContext.LoggingEvent);
+                    ForwardLoggingEvent(loggingEventContext.LoggingEvent, ThisType);
                 }
             }
 
             while (buffer.TryDequeue(out loggingEventContext))
             {
                 HttpContext = loggingEventContext.HttpContext;
-                ForwardLoggingEvent(loggingEventContext.LoggingEvent);
+                ForwardLoggingEvent(loggingEventContext.LoggingEvent, ThisType);
             }
         }
 
         private void ForwardBufferOverflowError()
         {
-            ForwardInternalError(String.Format("Buffer overflow. {0} logging events have been lost in the last 30 seconds. [BufferSize: {1}]", bufferOverflowCounter, bufferSize), null);
+            ForwardInternalError(String.Format("Buffer overflow. {0} logging events have been lost in the last 30 seconds. [BufferSize: {1}]", bufferOverflowCounter, bufferSize), null, ThisType);
             lastLoggedBufferOverflow = DateTime.UtcNow;
             bufferOverflowCounter = 0;
         }
-        
-        private void ForwardInternalError(string message, Exception exception)
-        {
-            LogLog.Error(ThisType, message, exception);
-            var loggingEvent = loggingEventHelper.CreateLoggingEvent(Level.Error, message, exception);
-            ForwardLoggingEvent(loggingEvent);
-        }
 
-
-        private void ForwardLoggingEvent(LoggingEvent loggingEvent)
-        {
-            try
-            {
-                base.Append(loggingEvent);
-            }
-            catch (Exception exception)
-            {
-                LogLog.Error(ThisType, "Unable to forward logging event", exception);
-            }
-        }
-
-        #endregion
-        
-        #region Appender Management
-
-        public override void AddAppender(IAppender newAppender)
-        {
-            base.AddAppender(newAppender);
-            SetAppenderFixFlags(newAppender);
-        }
-
-        private void SetFixFlags(FixFlags newFixFlags)
-        {
-            if (newFixFlags != fixFlags)
-            {
-                loggingEventHelper.Fix = newFixFlags;
-                fixFlags = newFixFlags;
-                InitializeAppenders();
-            }
-        }
-        
-        private void InitializeAppenders()
-        {
-            foreach (var appender in Appenders)
-            {
-                SetAppenderFixFlags(appender);
-            }
-        }
-        
-        private void SetAppenderFixFlags(IAppender appender)
-        {
-            var bufferingAppender = appender as BufferingAppenderSkeleton;
-            if (bufferingAppender != null)
-            {
-                bufferingAppender.Fix = Fix;
-            }
-        }
-
-        #endregion
+        #endregion Forwarding
 
         #region Buffer Management
 
@@ -285,6 +210,6 @@ namespace Log4Net.Async
             }
         }
 
-        #endregion
+        #endregion Buffer Management
     }
 }
