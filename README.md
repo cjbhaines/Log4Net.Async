@@ -41,7 +41,7 @@ Configuration wraps one of more appenders as shown in the following configuratio
 
 This appender utilizes [System.Collections.Concurrent.BlockingCollection(T)](http://msdn.microsoft.com/en-us/library/dd267312(v=vs.100).aspx) and other facets of the [Task Parallel  Library](http://msdn.microsoft.com/en-us/library/dd460717(v=vs.100).aspx) (TPL) to implement a lossless message queue.  This implementation does not use polling but rather waits until new messages are available to append.  This results in less CPU overhead for queue polling and appending starts without having to wait on sleep expiration.
 
-If the queue fills, threads creating messages will block, as they would if they were not using the ParallelForwardingAppender.  
+The default queue size is 1000 messages.  If the queue fills as a result of the rate of message creation exceeding the rate of appending, threads creating messages will block, as they would if they were not using the ParallelForwardingAppender.  
 
 Configuration wraps one of more appenders as shown in the following configuration example:
 
