@@ -31,11 +31,11 @@
         {
             get
             {
-                return CallContext.GetData("HtCt");
+                return CallContext.HostContext;
             }
             set
             {
-                CallContext.SetData("HtCt", value);
+                CallContext.HostContext = value;
             }
         }
 
