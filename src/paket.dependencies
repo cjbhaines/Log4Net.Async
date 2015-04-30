@@ -1,0 +1,5 @@
+source https://www.nuget.org/api/v2
+
+nuget log4net ~> 2.0
+nuget NUnit
+nuget RhinoMocks

@@ -8,6 +8,7 @@ using log4net.Util;
 
 namespace Log4Net.Async
 {
+    [Obsolete("Use AsyncForwardingAppender")]
     public class AsyncAdoAppender : AdoNetAppender
     {
         private RingBuffer<LoggingEvent> pendingAppends;

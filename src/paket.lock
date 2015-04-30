@@ -1,0 +1,6 @@
+NUGET
+  remote: https://www.nuget.org/api/v2
+  specs:
+    log4net (2.0.3)
+    NUnit (2.6.4)
+    RhinoMocks (3.6.1)
