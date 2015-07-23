@@ -22,7 +22,7 @@ namespace Log4Net.Async
 
         private int bufferSize = DefaultBufferSize;
 
-        public override int? BufferSize
+        public override int BufferSize
         {
             get { return bufferSize; }
             set { SetBufferSize(value); }
@@ -171,13 +171,13 @@ namespace Log4Net.Async
 
         #region Buffer Management
 
-        private void SetBufferSize(int? newBufferSize)
+        private void SetBufferSize(int newBufferSize)
         {
             lock (bufferLock)
             {
-                if (newBufferSize.HasValue && newBufferSize > 0 && newBufferSize != bufferSize)
+                if (newBufferSize > 0 && newBufferSize != bufferSize)
                 {
-                    bufferSize = newBufferSize.Value;
+                    bufferSize = newBufferSize;
                     InitializeBuffer();
                 }
             }

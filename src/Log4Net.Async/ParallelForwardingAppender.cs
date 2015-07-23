@@ -23,7 +23,7 @@
         private TimeSpan _shutdownFlushTimespan = TimeSpan.FromSeconds(5);
         private static readonly Type ThisType = typeof(ParallelForwardingAppender);
         private volatile bool shutDownRequested;
-        private int? bufferSize = DefaultBufferSize;
+        private int bufferSize = DefaultBufferSize;
 
         #endregion Private Members
 
@@ -32,7 +32,7 @@
         /// <summary>
         /// Gets or sets the number of LoggingEvents that will be buffered.  Set to null for unlimited.
         /// </summary>
-        public override int? BufferSize
+        public override int BufferSize
         {
             get { return bufferSize; }
             set { bufferSize = value; }
@@ -91,9 +91,9 @@
             }
             //Create a collection which will block the thread and wait for new entries
             //if the collection is empty
-            if (BufferSize.HasValue && BufferSize > 0)
+            if (BufferSize > 0)
             {
-                _loggingEvents = new BlockingCollection<LoggingEventContext>(BufferSize.Value);
+                _loggingEvents = new BlockingCollection<LoggingEventContext>(BufferSize);
             }
             else
             {
