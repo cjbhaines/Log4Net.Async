@@ -11,6 +11,12 @@ Multiple forwarding appenders may be configured, each having its own set of appe
 
 The library also includes asynchronous appender implementations for ADO.NET and rolling log files.  However, the forwarding appenders are recommended since they provide asynchronous ability in addition to the widely used and tested capabilities of the Log4Net core appenders.
 
+
+Testimonials 
+=============
+If you find this library useful, please give us some feedback and any details about performance gains you may have measured. Thanks in advance!
+
+
 Forwarding Appenders
 =============
 
