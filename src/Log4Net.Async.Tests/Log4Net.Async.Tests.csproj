@@ -43,6 +43,8 @@
     <Compile Include="AsyncAdoAppenderTest.cs" />
     <Compile Include="AsyncForwarderTest.cs" />
     <Compile Include="AsyncRollingFileAppenderTest.cs" />
+    <Compile Include="AsyncForwarderFromConfigTest.cs" />
+    <Compile Include="ParallelForwarderFromConfigTest.cs" />
     <Compile Include="ParallelForwarderTest.cs" />
     <Compile Include="DebugAppender.cs" />
     <Compile Include="IntExtensions.cs" />
@@ -51,6 +53,7 @@
     <Compile Include="RingBufferTest.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
