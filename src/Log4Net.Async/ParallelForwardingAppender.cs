@@ -93,7 +93,7 @@
             //if the collection is empty
             if (BufferSize > 0)
             {
-                _loggingEvents = new BlockingCollection<LoggingEventContext>(BufferSize.Value);
+                _loggingEvents = new BlockingCollection<LoggingEventContext>(BufferSize);
             }
             else
             {
