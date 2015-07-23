@@ -11,6 +11,11 @@ Multiple forwarding appenders may be configured, each having its own set of appe
 
 The library also includes asynchronous appender implementations for ADO.NET and rolling log files.  However, the forwarding appenders are recommended since they provide asynchronous ability in addition to the widely used and tested capabilities of the Log4Net core appenders.
 
+Version 2.X Release Notes
+=============
+
+- AsyncAdoAppender and AsyncRollingFileAppender have been removed after being obsolete for a while. The Forwarding appenders are a much better solution.
+- BufferSize config value was not working due to nullable type conversion, see #13  
 
 Testimonials 
 =============
@@ -68,28 +73,6 @@ Configuration wraps one of more appenders as shown in the following configuratio
 		<appender-ref ref="asyncForwarder" />
 	</root>
   
-Async Appenders
-=============
-###AsyncAdoAppender
-
-	<appender name="asyncAdoNet" type="Log4Net.Async.AsyncAdoAppender,Log4Net.Async">
-		...
-	</appender>
-	
-	<root>
-      <appender-ref ref="asyncAdoNet" />
-    </root>
-
-###AsyncRollingFileAppender
-
-	<appender name="asyncRollingFile" type="Log4Net.Async.AsyncRollingFileAppender,Log4Net.Async">
-		...
-	</appender>
-	
-	<root>
-      <appender-ref ref="asyncRollingFile" />
-    </root>
-
 
 Notes
 =============

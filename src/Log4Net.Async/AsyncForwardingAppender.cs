@@ -52,12 +52,11 @@ namespace Log4Net.Async
                 return;
             }
 
-            forwardingThread =
-                new Thread(ForwardingThreadExecute)
-                {
-                    Name = String.Format("{0} Forwarding Appender Thread", Name),
-                    IsBackground = false,
-                };
+            forwardingThread = new Thread(ForwardingThreadExecute)
+            {
+                Name = String.Format("{0} Forwarding Appender Thread", Name),
+                IsBackground = false,
+            };
             forwardingThread.Start();
         }
 
