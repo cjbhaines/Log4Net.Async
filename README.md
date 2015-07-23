@@ -5,11 +5,9 @@ Log4Net.Async
 
 This library provides asynchronous Log4Net logging.  Application performance is improved by performing message appending I/O operations on one or more background threads.
 
-This library includes two types of forwarding appenders.  Forwarding appenders augment or otherwise alter the behavior of other appenders.  In this case logging operations are buffered or queued until the background thread is available to forward log messages to another appender or appenders.  This allows the thread that is creating log messages to continue rather than waiting on I/O operations.   
+Forwarding appenders augment or otherwise alter the behavior of other appenders.  In this case logging operations are buffered or queued until the background thread is available to forward log messages to another appender or appenders.  This allows the thread that is creating log messages to continue rather than waiting on I/O operations.   
 
 Multiple forwarding appenders may be configured, each having its own set of appenders, dedicated message queue, and background appending thread.  This enables parallel appending while maintaining message sequence.
-
-The library also includes asynchronous appender implementations for ADO.NET and rolling log files.  However, the forwarding appenders are recommended since they provide asynchronous ability in addition to the widely used and tested capabilities of the Log4Net core appenders.
 
 Version 2.X Release Notes
 =============
