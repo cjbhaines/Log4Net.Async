@@ -44,7 +44,7 @@
         /// </summary>
         protected abstract string InternalLoggerName { get; }
 
-        public abstract int? BufferSize { get; set; }
+        public abstract int BufferSize { get; set; }
 
         #endregion Properties
 
