@@ -65,6 +65,7 @@ Configuration wraps one of more appenders as shown in the following configuratio
 	<appender name="asyncForwarder" type="Log4Net.Async.ParallelForwardingAppender,Log4Net.Async">
 		<appender-ref ref="rollingFile" />
 		<appender-ref ref="adoNet" />
+		<bufferSize value="200" />
 	</appender>
 
 	<root>
