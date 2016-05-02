@@ -3,7 +3,7 @@ using log4net.Core;
 
 namespace Log4Net.Async
 {
-    public class LoggingEventHelper
+    public sealed class LoggingEventHelper
     {
         // needs to be a seperate class so that location is determined correctly by log4net when required
 
@@ -20,8 +20,10 @@ namespace Log4Net.Async
 
         public LoggingEvent CreateLoggingEvent(Level level, string message, Exception exception)
         {
-            var loggingEvent = new LoggingEvent(HelperType, null, loggerName, level, message, exception);
-            loggingEvent.Fix = Fix;
+            var loggingEvent = new LoggingEvent(HelperType, null, loggerName, level, message, exception)
+            {
+                Fix = Fix
+            };
             return loggingEvent;
         }
     }

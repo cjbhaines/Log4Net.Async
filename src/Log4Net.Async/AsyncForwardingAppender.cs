@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace Log4Net.Async
 {
-    public class AsyncForwardingAppender : AsyncForwardingAppenderBase
+    public sealed class AsyncForwardingAppender : AsyncForwardingAppenderBase
     {
         private static readonly TimeSpan ShutdownFlushTimeout = TimeSpan.FromSeconds(5);
         private static readonly Type ThisType = typeof(AsyncForwardingAppender);

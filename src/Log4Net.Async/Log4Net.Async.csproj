@@ -42,6 +42,7 @@
     <Compile Include="LoggingEventHelper.cs" />
     <Compile Include="ParallelForwardingAppender.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReferencedLibraryAttribute.cs" />
     <Compile Include="RingBuffer.cs" />
   </ItemGroup>
   <ItemGroup>

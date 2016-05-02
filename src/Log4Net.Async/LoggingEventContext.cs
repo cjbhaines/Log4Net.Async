@@ -2,7 +2,7 @@
 {
     using log4net.Core;
 
-    internal class LoggingEventContext
+    internal sealed class LoggingEventContext
     {
         public LoggingEventContext(LoggingEvent loggingEvent, object httpContext)
         {

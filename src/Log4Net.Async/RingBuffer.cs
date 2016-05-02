@@ -2,7 +2,7 @@
 
 namespace Log4Net.Async
 {
-    public class RingBuffer<T> : IQueue<T>
+    public sealed class RingBuffer<T> : IQueue<T>
     {
         private readonly object lockObject = new object();
         private readonly T[] buffer;
