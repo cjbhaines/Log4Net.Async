@@ -51,7 +51,7 @@
         public override void ActivateOptions()
         {
             base.ActivateOptions();
-            loggingEventHelper = new LoggingEventHelper(InternalLoggerName, DefaultFixFlags);
+            loggingEventHelper = new LoggingEventHelper(InternalLoggerName, Fix);
             InitializeAppenders();
         }
 
@@ -67,7 +67,10 @@
         {
             if (newFixFlags != fixFlags)
             {
-                loggingEventHelper.Fix = newFixFlags;
+                if (loggingEventHelper != null)
+                {
+                    loggingEventHelper.Fix = newFixFlags;
+                }
                 fixFlags = newFixFlags;
                 InitializeAppenders();
             }
