@@ -20,7 +20,6 @@
         private CancellationToken _loggingCancelationToken;
         private Task _loggingTask;
         private Double _shutdownFlushTimeout = 5;
-        private TimeSpan _shutdownFlushTimespan = TimeSpan.FromSeconds(5);
         private static readonly Type ThisType = typeof(ParallelForwardingAppender);
         private volatile bool shutDownRequested;
         private int bufferSize = DefaultBufferSize;
@@ -79,7 +78,6 @@
         public override void ActivateOptions()
         {
             base.ActivateOptions();
-            _shutdownFlushTimespan = TimeSpan.FromSeconds(_shutdownFlushTimeout);
             StartForwarding();
         }
 
@@ -120,8 +118,18 @@
             }
             //Don't allow more entries to be added.
             _loggingEvents.CompleteAdding();
+
             //Allow some time to flush
-            Thread.Sleep(_shutdownFlushTimespan);
+            var sleepInterval = TimeSpan.FromMilliseconds(100);
+            var flushTimespan = TimeSpan.FromSeconds(_shutdownFlushTimeout);
+
+            //Sleep until either timeout is expired or all events have flushed
+            while (flushTimespan >= sleepInterval && !_loggingEvents.IsCompleted)
+            {
+                flushTimespan -= sleepInterval;
+                Thread.Sleep(sleepInterval);
+            }
+
             if (!_loggingTask.IsCompleted && !_loggingCancelationToken.IsCancellationRequested)
             {
                 _loggingCancelationTokenSource.Cancel();
