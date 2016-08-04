@@ -171,6 +171,74 @@ namespace Log4Net.Async.Tests
             Console.WriteLine("Flushed {0} events during shutdown", numberLoggedAfterClose - numberLoggedBeforeClose);
         }
 
+        [Test]
+        public void WillResumeShutdownOnceBufferIsFlushed()
+        {
+            const int testSize = 10;
+            const int appenderDelayMs = 100;
+
+            // Arrange
+            debugAppender.AppendDelay = TimeSpan.FromMilliseconds(appenderDelayMs);            
+            // Set the delay to 10x time required to process
+            asyncForwardingAppender.ShutdownFlushTimeout = (testSize * appenderDelayMs / 1000.00) * 10;
+
+            var watch = new Stopwatch(); 
+
+            // Act
+            for (int i = 0; i < testSize; i++)
+            {
+                log.Error("Exception");
+            }
+
+            Thread.Sleep(50);
+
+            watch.Start();
+            asyncForwardingAppender.Close();
+            watch.Stop();
+
+            PrintShutDownTimings(testSize, watch);
+
+            // Expect that the flushing of events/shutdown will take less configured shutdown
+            Assert.That(watch.ElapsedMilliseconds, Is.LessThan(asyncForwardingAppender.ShutdownFlushTimeout * 1000.00), "Shutdown should resume immediately after appender close");
+        }
+
+        [Test]
+        public void WillWaitConfiguredTimeForShutdown()
+        {
+            const int testSize = 50;
+            const int timeoutSeconds = 2;
+
+            // Arrange enough items to keep the queue full during shutdown
+            debugAppender.AppendDelay = TimeSpan.FromMilliseconds(100);
+            // Set delay that is significantly shorter than the amount of work
+            asyncForwardingAppender.ShutdownFlushTimeout = timeoutSeconds;
+
+            var watch = new Stopwatch();
+
+            // Act
+            for (int i = 0; i < testSize; i++)
+            {
+                log.Error("Exception");
+            }
+
+            Thread.Sleep(50);
+
+            watch.Start();
+            asyncForwardingAppender.Close();            
+            watch.Stop();
+
+            PrintShutDownTimings(testSize, watch);
+
+            // Expect that the actual wait for timeout was not less than the configured value
+            Assert.That(watch.ElapsedMilliseconds, Is.GreaterThanOrEqualTo(asyncForwardingAppender.ShutdownFlushTimeout * 1000.00));
+        }
+
+        private void PrintShutDownTimings(int testSize, Stopwatch watch)
+        {
+            Console.WriteLine("Amount of work for the debug appender: {0}ms, configured flush timeout is {1}s, actual shutdown took {2}ms",
+                testSize * debugAppender.AppendDelay.TotalMilliseconds, asyncForwardingAppender.ShutdownFlushTimeout, watch.ElapsedMilliseconds);
+        }
+
         [Test, Explicit("Long-running")]
         public void WillShutdownIfBufferCannotBeFlushedFastEnough()
         {
