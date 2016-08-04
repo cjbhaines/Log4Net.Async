@@ -11,7 +11,7 @@
     <description>Asynchronous Log4Net appenders and forwarder</description>
     <tags>log4net .net40 asynchronous async</tags>
     <dependencies>
-      <dependency id="log4net" version="2.0.3" />
+      <dependency id="log4net" version="2.0.4" />
     </dependencies>
   </metadata>
   <files>
