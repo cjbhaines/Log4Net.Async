@@ -44,6 +44,18 @@ namespace Log4Net.Async.Tests
         }
 
         [Test]
+        public void NoExceptionThrownWhenCancelBeforeEndAndNoEvent()
+        {
+            // Arrange
+            
+            // Act
+            LogManager.Shutdown();
+            
+            // Assert
+            Assert.That(debugAppender.LoggedEventCount, Is.EqualTo(0), "No message or exception expected");
+        }
+        
+        [Test]
         public void CanHandleNullLoggingEvent()
         {
             // Arrange
