@@ -52,7 +52,7 @@ This appender utilizes [System.Collections.Concurrent.BlockingCollection(T)](htt
 
 The default queue size is 1000 messages.  If the queue fills as a result of the rate of message creation exceeding the rate of appending, threads creating messages will block, as they would if they were not using the ParallelForwardingAppender.  
 
-Configuration wraps one of more appenders as shown in the following configuration example:
+Configuration wraps one or more appenders as shown in the following configuration example:
 
 	<appender name="rollingFile" type="log4net.Appender.RollingFileAppender">
 		...
