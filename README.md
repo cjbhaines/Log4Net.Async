@@ -23,7 +23,7 @@ If you find this library useful, please give us some feedback and any details ab
 Forwarding Appenders
 =============
 
-###AsyncForwardingAppender
+### AsyncForwardingAppender
 
 This appender utilizes a ring buffer with a a default limit of 1000 messages.  If the head of the buffer overtakes the tail, message loss occurs.  This behavior prioritizes application performance over logging fidelity.  The current implementation uses a 10ms polling (sleep) period on the background thread.
 
@@ -46,7 +46,7 @@ Configuration wraps one of more appenders as shown in the following configuratio
 		<appender-ref ref="asyncForwarder" />
 	</root>
 
-###ParallelForwardingAppender
+### ParallelForwardingAppender
 
 This appender utilizes [System.Collections.Concurrent.BlockingCollection(T)](http://msdn.microsoft.com/en-us/library/dd267312(v=vs.100).aspx) and other facets of the [Task Parallel  Library](http://msdn.microsoft.com/en-us/library/dd460717(v=vs.100).aspx) (TPL) to implement a lossless message queue.  This implementation does not use polling but rather waits until new messages are available to append.  This results in less CPU overhead for queue polling and appending starts without having to wait on sleep expiration.
 
