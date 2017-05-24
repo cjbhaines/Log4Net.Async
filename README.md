@@ -27,7 +27,7 @@ Forwarding Appenders
 
 This appender utilizes a ring buffer with a a default limit of 1000 messages.  If the head of the buffer overtakes the tail, message loss occurs.  This behavior prioritizes application performance over logging fidelity.  The current implementation uses a 10ms polling (sleep) period on the background thread.
 
-Configuration wraps one of more appenders as shown in the following configuration example:
+Configuration wraps one or more appenders as shown in the following configuration example:
 
 	<appender name="rollingFile" type="log4net.Appender.RollingFileAppender">
 		...
