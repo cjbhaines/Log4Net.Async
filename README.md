@@ -1,3 +1,7 @@
+DEPRECATED
+=============
+This library has been deprecated in favour of more widely used frameworks such as Microsoft.Extensions.Logging built into .NET Core, or Serilog.
+
 Log4Net.Async
 =============
 
@@ -14,10 +18,6 @@ Version 2.X Release Notes
 
 - AsyncAdoAppender and AsyncRollingFileAppender have been removed after being obsolete for a while. The Forwarding appenders are a much better solution.
 - BufferSize config value was not working due to nullable type conversion, see #13  
-
-Testimonials 
-=============
-If you find this library useful, please give us some feedback and any details about performance gains you may have measured. Thanks in advance!
 
 
 Forwarding Appenders
